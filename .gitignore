@@ -1,0 +1,6 @@
+.vscode
+.idea
+logFiles
+
+# bin file
+hugo-server
