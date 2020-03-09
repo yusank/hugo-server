@@ -17,7 +17,7 @@ func NewRouter(r *klyn.RouterGroup) {
 		githubRouter.POST("/webhook", githubWebhookHandler)
 	}
 
-	r.POST("/admin/web/restart",restartHandler)
+	//r.POST("/admin/web/restart",restartHandler)
 }
 
 func githubWebhookHandler(c *klyn.Context) {
