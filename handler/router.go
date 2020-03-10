@@ -3,11 +3,12 @@ package handler
 import (
 	"bufio"
 	"encoding/json"
-	"github.com/yusank/klyn"
 	"io"
 	"log"
 	"net/http"
 	"os/exec"
+
+	"github.com/yusank/klyn"
 )
 
 // NewRouter - register router
@@ -22,14 +23,16 @@ func NewRouter(r *klyn.RouterGroup) {
 
 func githubWebhookHandler(c *klyn.Context) {
 	var f = make(map[string]interface{})
-	if err := bindJson(&f, c);err != nil {
+	if err := bindJson(&f, c); err != nil {
 		c.AbortWithJSON(klyn.K{"errcode": -1})
 		return
 	}
 
-	if err := restartHugoWeb();err != nil {
-		log.Println("restart err:",err)
-	}
+	go func() {
+		if err := restartHugoWeb(); err != nil {
+			log.Println("restart err:", err)
+		}
+	}()
 
 	log.Println(f)
 	c.JSON(200, klyn.K{"errcode": 0})
@@ -41,28 +44,28 @@ func bindJson(v interface{}, c *klyn.Context) error {
 }
 
 func restartHandler(c *klyn.Context) {
-	if err := restartHugoWeb();err != nil {
+	if err := restartHugoWeb(); err != nil {
 		c.JSON(http.StatusOK, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK,"ok")
+	c.JSON(http.StatusOK, "ok")
 }
 
 func restartHugoWeb() error {
-	cmd :=  exec.Command("/bin/sh", "-c","/home/dev/hugo.yusank.space/deploy.sh")
-	log.Println(2,cmd.String())
-	out,err := cmd.StdoutPipe()
+	cmd := exec.Command("/bin/sh", "-c", "/home/dev/hugo.yusank.space/deploy.sh")
+	log.Println(2, cmd.String())
+	out, err := cmd.StdoutPipe()
 	if err != nil {
 		return err
 	}
 
-	eOut,err := cmd.StderrPipe()
+	eOut, err := cmd.StderrPipe()
 	if err != nil {
 		return err
 	}
 
-	if err := cmd.Start();err != nil {
+	if err := cmd.Start(); err != nil {
 		return err
 	}
 
